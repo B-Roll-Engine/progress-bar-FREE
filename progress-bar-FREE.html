@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Animated Progress Bar — B-Roll Engine (Free)</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#07090e;--surface:#0d1018;--surface2:#111520;--border:#1a2030;--accent:#00a8ff;--gold:#c8a84b;--green:#00cc88;--text:#edf0f7;--muted:#46536e;--radius:7px;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 4rem;}
+.hdr{text-align:center;margin-bottom:2rem;}
+.hdr-brand{font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:6px;color:var(--accent);margin-bottom:.3rem;}
+.hdr-title{font-family:'Bebas Neue',sans-serif;font-size:2.3rem;letter-spacing:2px;color:var(--text);margin-bottom:.4rem;}
+.hdr-badge{display:inline-flex;align-items:center;gap:.4rem;background:rgba(0,168,255,.08);border:1px solid rgba(0,168,255,.25);color:var(--muted);font-size:.68rem;letter-spacing:2px;padding:4px 14px;border-radius:3px;margin-bottom:.4rem;}
+.hdr-sub{color:var(--muted);font-size:.8rem;line-height:1.6;}
+.layout{display:grid;grid-template-columns:380px 1fr;gap:1.4rem;width:100%;max-width:1060px;align-items:start;}
+@media(max-width:800px){.layout{grid-template-columns:1fr;}}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;}
+.panel-title{font-size:.62rem;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:1.1rem;padding-bottom:.7rem;border-bottom:1px solid var(--border);}
+.sec{font-size:.62rem;letter-spacing:2.5px;color:var(--accent);text-transform:uppercase;margin:1.1rem 0 .65rem;display:flex;align-items:center;gap:.5rem;}
+.sec::after{content:'';flex:1;height:1px;background:var(--border);}
+.field{margin-bottom:.9rem;}
+.field label{display:block;font-size:.72rem;color:var(--muted);margin-bottom:.3rem;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;}
+input[type=number],input[type=text]{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.88rem;padding:.52rem .75rem;outline:none;transition:border-color .18s;}
+input:focus{border-color:var(--accent);}
+input[type=color]{width:100%;height:38px;padding:3px 5px;border:1px solid var(--border);border-radius:5px;background:var(--bg);cursor:pointer;outline:none;}
+input[type=range]{flex:1;accent-color:var(--accent);height:4px;cursor:pointer;}
+.range-row{display:flex;align-items:center;gap:.7rem;}
+.range-val{font-size:.75rem;color:var(--muted);min-width:36px;text-align:right;}
+.btn{width:100%;padding:.72rem;border:none;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer;transition:all .18s;letter-spacing:.3px;margin-bottom:.5rem;}
+.btn-primary{background:var(--accent);color:#000;}
+.btn-primary:hover{background:#29b8ff;}
+.btn-outline{background:transparent;border:1px solid var(--accent);color:var(--accent);}
+.btn-outline:hover{background:rgba(0,168,255,.09);}
+.btn-outline:disabled{opacity:.35;cursor:not-allowed;}
+.preview-panel{display:flex;flex-direction:column;gap:.9rem;}
+.canvas-wrap{background:#000;border-radius:8px;overflow:hidden;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;min-height:240px;position:relative;}
+canvas{display:block;max-width:100%;}
+.prog-wrap{display:none;margin-top:.5rem;}
+.prog-bg{background:var(--surface2);border-radius:4px;height:6px;overflow:hidden;margin-bottom:.35rem;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--green));border-radius:4px;width:0%;transition:width .08s;}
+.prog-lbl{font-size:.7rem;color:var(--muted);text-align:center;}
+.upgrade-card{background:linear-gradient(135deg,#0d1018,#111a2a);border:1px solid rgba(200,168,75,.3);border-radius:8px;padding:1.2rem 1.4rem;}
+.upgrade-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px;color:var(--gold);margin-bottom:.5rem;}
+.upgrade-list{font-size:.75rem;color:var(--muted);line-height:1.9;margin-bottom:.9rem;}
+.upgrade-list span{color:var(--text);}
+.upgrade-btn{display:block;width:100%;text-align:center;background:linear-gradient(135deg,#a0801e,#c8a84b);color:#000;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:700;padding:.65rem;border-radius:6px;text-decoration:none;letter-spacing:.5px;transition:opacity .18s;}
+.upgrade-btn:hover{opacity:.85;}
+.free-badge{position:absolute;top:.6rem;left:.6rem;background:rgba(70,83,110,.15);border:1px solid var(--border);color:var(--muted);font-size:.6rem;letter-spacing:1.5px;padding:2px 8px;border-radius:3px;}
+.wm-note{font-size:.68rem;color:var(--muted);margin-top:.3rem;line-height:1.5;}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-brand">B-ROLL ENGINE</div>
+  <div class="hdr-title">Animated Progress Bar</div>
+  <div class="hdr-badge">FREE VERSION — 480p · Watermarked</div>
+  <div class="hdr-sub">Create animated progress bars for your videos. Free · No signup · Runs in browser.<br><span style="color:var(--accent);font-size:.75rem;">Preview the full tool below ↓ — upgrade for 8 styles, 7 sounds, 4K, and 13 presets.</span></div>
+</div>
+
+<div class="layout">
+  <div class="panel">
+    <div class="panel-title">Progress Settings</div>
+    <div class="grid2">
+      <div class="field"><label>Start %</label><input type="number" id="startPct" value="0" min="0" max="100"></div>
+      <div class="field"><label>End %</label><input type="number" id="endPct" value="100" min="0" max="100"></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>Duration (sec)</label><input type="number" id="duration" value="3" min="1" max="30"></div>
+      <div class="field"><label>Hold After (sec)</label><input type="number" id="postHold" value="1" min="0" max="10" step="0.5"></div>
+    </div>
+    <div class="sec">Colors</div>
+    <div class="grid2">
+      <div class="field"><label>Background</label><input type="color" id="bgColor" value="#000000"></div>
+      <div class="field"><label>Bar Fill</label><input type="color" id="fillColor" value="#00a8ff"></div>
+    </div>
+    <div class="sec">Bar Style <small style="color:var(--muted);font-size:.62rem;letter-spacing:0;text-transform:none;">— 2 of 8 available free</small></div>
+    <div style="display:flex;gap:.4rem;margin-bottom:.8rem;">
+      <div id="styleRounded" onclick="selectStyle('rounded')" style="flex:1;background:var(--bg);border:1px solid var(--accent);border-radius:4px;color:var(--accent);font-size:.72rem;padding:.35rem .5rem;cursor:pointer;text-align:center;user-select:none;">◼ Rounded</div>
+      <div id="styleGlow" onclick="selectStyle('glow')" style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--muted);font-size:.72rem;padding:.35rem .5rem;cursor:pointer;text-align:center;user-select:none;">✦ Glow Pulse</div>
+      <div onclick="" style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--muted);font-size:.68rem;padding:.35rem .5rem;text-align:center;opacity:.45;cursor:not-allowed;user-select:none;">🔒 +6 more</div>
+    </div>
+    <div class="sec">Bar Height</div>
+    <div class="field"><div class="range-row"><input type="range" id="barHeight" min="2" max="20" value="5"><span class="range-val" id="barHeightLabel">5%</span></div></div>
+
+    <button class="btn btn-primary" onclick="startPreview()">▶ &nbsp;Preview Animation</button>
+    <button class="btn btn-outline" id="btnExport" onclick="exportVideo()" disabled>⬇ &nbsp;Export WebM (480p · Watermarked)</button>
+    <div class="wm-note">⚠ Free exports are 480p and watermarked. Upgrade for 1080p/4K · no watermark · 8 bar styles · 7 sounds · milestone markers · completion burst · shimmer · 13 presets · transparent export.</div>
+
+    <div class="prog-wrap" id="progWrap">
+      <div class="prog-bg"><div class="prog-fill" id="progFill"></div></div>
+      <div class="prog-lbl" id="progLabel">Rendering…</div>
+    </div>
+  </div>
+
+  <div class="preview-panel">
+    <div class="panel">
+      <div class="panel-title">Preview</div>
+      <div class="canvas-wrap" id="canvasWrap">
+        <canvas id="mainCanvas"></canvas>
+        <div class="free-badge">FREE VERSION</div>
+      </div>
+    </div>
+    <div class="upgrade-card">
+      <div class="upgrade-title">★ Upgrade to Progress Bar Pro — $19</div>
+      <div class="upgrade-list">
+        ✦ <span>1080p HD &amp; 4K UHD · 9:16 Vertical · 1:1 Square</span><br>
+        ✦ <span>No watermark — clean professional output</span><br>
+        ✦ <span>8 bar styles: Rounded, Sharp, Pill (dual-color), 3D Depth, Segmented, Striped (animated), Gradient Track, Glow Pulse</span><br>
+        ✦ <span>7 sound effects: Whoosh, Electric Build, Progress Ticks, Money Counter, Power Charge, Heartbeat Pulse, Data Stream</span><br>
+        ✦ <span>8 easing modes including Elastic Overshoot and Step (data)</span><br>
+        ✦ <span>Milestone markers — diamond ticks that light up as bar passes them</span><br>
+        ✦ <span>Completion burst — animated rings + particles that fire and disappear at end</span><br>
+        ✦ <span>Liquid shimmer sweep — moving highlight inside the fill</span><br>
+        ✦ <span>Sub-label caption text (e.g. "Monthly Revenue Goal")</span><br>
+        ✦ <span>13 one-click presets — Q4 Revenue, YouTube Milestone, Gaming XP, Fundraising, Flash Sale, AI Training, and more</span><br>
+        ✦ <span>Transparent background WebM — alpha channel overlay for DaVinci &amp; Premiere</span><br>
+        ✦ <span>Label above, below, or inside bar · prefix · suffix · font choice</span>
+      </div>
+      <a href="https://whop.com/checkout/plan_LAHUewDAV1AP7" target="_blank" class="upgrade-btn">Get Pro for $9 (Launch Price) →</a>
+    </div>
+  </div>
+</div>
+
+<script>
+var canvas = document.getElementById('mainCanvas');
+var ctx = canvas.getContext('2d');
+var rafId = null;
+var audioCtx = null;
+var mediaRecorder = null, recordedChunks = [];
+
+var W = 854, H = 480; // 480p — free version locked
+var currentStyle = 'rounded';
+
+function selectStyle(style) {
+  currentStyle = style;
+  var r = document.getElementById('styleRounded');
+  var g = document.getElementById('styleGlow');
+  if(style === 'rounded') {
+    r.style.borderColor = 'var(--accent)'; r.style.color = 'var(--accent)';
+    g.style.borderColor = 'var(--border)'; g.style.color = 'var(--muted)';
+  } else {
+    g.style.borderColor = 'var(--accent)'; g.style.color = 'var(--accent)';
+    r.style.borderColor = 'var(--border)'; r.style.color = 'var(--muted)';
+  }
+  var s = getSettings(); drawFrame(0, s);
+}
+
+function easeOut(t) { return 1 - Math.pow(1-t, 3); }
+
+function getSettings() {
+  return {
+    startPct: Math.min(100, Math.max(0, parseFloat(document.getElementById('startPct').value) || 0)),
+    endPct:   Math.min(100, Math.max(0, parseFloat(document.getElementById('endPct').value) || 100)),
+    duration: Math.max(1, Math.min(30, parseFloat(document.getElementById('duration').value) || 3)),
+    postHold: Math.max(0, parseFloat(document.getElementById('postHold').value) || 1),
+    bgColor:  document.getElementById('bgColor').value,
+    fillColor:document.getElementById('fillColor').value,
+    barH:     parseInt(document.getElementById('barHeight').value) || 5
+  };
+}
+
+function hexToRgb(hex){
+  hex=hex.replace('#','');
+  if(hex.length===3)hex=hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+  return{r:parseInt(hex.slice(0,2),16),g:parseInt(hex.slice(2,4),16),b:parseInt(hex.slice(4,6),16)};
+}
+function rgba(hex,a){var c=hexToRgb(hex);return 'rgba('+c.r+','+c.g+','+c.b+','+a+')';}
+
+function drawFrame(progress, s) {
+  canvas.width = W; canvas.height = H;
+  ctx.fillStyle = s.bgColor;
+  ctx.fillRect(0, 0, W, H);
+
+  var eased = easeOut(Math.max(0, Math.min(1, progress)));
+  var current = s.startPct + (s.endPct - s.startPct) * eased;
+
+  var margin = W * 0.08;
+  var barW = W - margin * 2;
+  var barH = (s.barH / 100) * H;
+  barH = Math.max(4, Math.min(H * 0.35, barH));
+  var barY = H / 2 - barH / 2;
+  var span = (s.endPct - s.startPct) || 1;
+  var fillFrac = Math.max(0, Math.min(1, (current - s.startPct) / span));
+  var fillW = fillFrac * barW;
+  var radius = barH / 2;
+
+  if (currentStyle === 'glow') {
+    // ── GLOW PULSE style
+    var pulse = 0.5 + 0.5 * Math.sin(Date.now() / 400);
+    var glowAmt = 50 * (0.7 + 0.4 * pulse);
+    // Track with soft halo
+    ctx.shadowColor = rgba(s.fillColor, 0.3);
+    ctx.shadowBlur = glowAmt * 0.3;
+    ctx.fillStyle = '#1a2030';
+    roundRect(ctx, margin, barY, barW, barH, radius); ctx.fill();
+    ctx.shadowBlur = 0;
+    if (fillW > 0) {
+      var frad = Math.min(radius, fillW/2);
+      // Main fill with bloom
+      ctx.shadowColor = s.fillColor; ctx.shadowBlur = glowAmt;
+      var gfg = ctx.createLinearGradient(margin, 0, margin + barW, 0);
+      gfg.addColorStop(0, s.fillColor);
+      gfg.addColorStop(1, '#0060cc');
+      ctx.fillStyle = gfg;
+      roundRect(ctx, margin, barY, fillW, barH, frad); ctx.fill();
+      // Second bloom pass
+      ctx.shadowBlur = glowAmt * 0.5;
+      ctx.fillStyle = rgba(s.fillColor, 0.4);
+      roundRect(ctx, margin, barY, fillW, barH, frad); ctx.fill();
+      ctx.shadowBlur = 0;
+      // White core highlight
+      ctx.save(); roundRect(ctx, margin, barY, fillW, barH, frad); ctx.clip();
+      var core = ctx.createLinearGradient(0, barY, 0, barY + barH * 0.45);
+      core.addColorStop(0, 'rgba(255,255,255,0.5)'); core.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = core; ctx.fillRect(margin, barY, fillW, barH);
+      ctx.restore();
+    }
+  } else {
+    // ── ROUNDED style (default)
+    ctx.fillStyle = '#1a2030';
+    roundRect(ctx, margin, barY, barW, barH, radius); ctx.fill();
+    if (fillW > 0) {
+      ctx.shadowColor = s.fillColor; ctx.shadowBlur = 18;
+      var rfg = ctx.createLinearGradient(margin, 0, margin + barW, 0);
+      rfg.addColorStop(0, s.fillColor); rfg.addColorStop(1, '#0060cc');
+      ctx.fillStyle = rfg;
+      roundRect(ctx, margin, barY, fillW, barH, Math.min(radius, fillW/2)); ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+  }
+
+  // Leading edge pulse dot
+  if (fillW > 2 && progress > 0 && progress < 1) {
+    var px = margin + fillW;
+    var pa = 0.55 + 0.35 * Math.sin(Date.now() / 130);
+    var pc = hexToRgb(s.fillColor);
+    ctx.shadowColor = s.fillColor; ctx.shadowBlur = barH * 0.9;
+    ctx.fillStyle = 'rgba('+pc.r+','+pc.g+','+pc.b+','+pa+')';
+    ctx.beginPath(); ctx.arc(px, barY + barH/2, barH * 0.55, 0, Math.PI*2); ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+
+  // % label
+  ctx.font = 'bold ' + Math.round(barH * 1.4) + 'px Bebas Neue, monospace';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.shadowColor = s.fillColor;
+  ctx.shadowBlur = currentStyle === 'glow' ? 30 : 18;
+  ctx.fillStyle = s.fillColor;
+  ctx.fillText(Math.round(current) + '%', W/2, barY - barH * 1.2);
+  ctx.shadowBlur = 0;
+
+  // WATERMARK — prominent, burned into canvas, cannot be cropped cleanly
+  var wmH = Math.round(H * 0.052);
+  // Bottom right
+  ctx.font = 'bold ' + wmH + 'px DM Sans, sans-serif';
+  ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+  ctx.fillStyle = 'rgba(255,255,255,0.22)';
+  ctx.fillText('B-ROLL ENGINE — FREE VERSION', W - 16, H - 12);
+  // Top left
+  ctx.font = Math.round(wmH * 0.82) + 'px DM Sans, sans-serif';
+  ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+  ctx.fillStyle = 'rgba(255,255,255,0.14)';
+  ctx.fillText('brollengine.com', 16, 12);
+  // Center subtle diagonal (harder to crop out)
+  ctx.save();
+  ctx.translate(W/2, H/2);
+  ctx.rotate(-Math.PI/18);
+  ctx.font = Math.round(H * 0.032) + 'px DM Sans, sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillStyle = 'rgba(255,255,255,0.04)';
+  ctx.fillText('brollengine.com — free version', 0, 0);
+  ctx.restore();
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  if (w < 0) return;
+  r = Math.min(r, h/2, w/2);
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.lineTo(x+w-r, y); ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+  ctx.lineTo(x+w, y+h-r); ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  ctx.lineTo(x+r, y+h); ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+  ctx.lineTo(x, y+r); ctx.quadraticCurveTo(x, y, x+r, y);
+  ctx.closePath();
+}
+
+function startPreview() {
+  if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  if (rafId) cancelAnimationFrame(rafId);
+  var s = getSettings();
+  var durMs = s.duration * 1000;
+  var postMs = s.postHold * 1000;
+  var totalMs = durMs + postMs;
+  var startT = performance.now();
+  function tick() {
+    var el = performance.now() - startT;
+    var prog = el < durMs ? el/durMs : 1;
+    drawFrame(prog, s);
+    if (el < totalMs) rafId = requestAnimationFrame(tick);
+    else { drawFrame(1, s); document.getElementById('btnExport').disabled = false; }
+  }
+  document.getElementById('btnExport').disabled = true;
+  tick();
+}
+
+function exportVideo() {
+  if (!audioCtx) { alert('Click Preview first.'); return; }
+  var s = getSettings();
+  var durMs = s.duration * 1000;
+  var postMs = s.postHold * 1000;
+  var totalMs = durMs + postMs;
+  canvas.width = W; canvas.height = H;
+  var stream = canvas.captureStream(30);
+  recordedChunks = [];
+  var options = { mimeType: 'video/webm;codecs=vp9', videoBitsPerSecond: 4000000 };
+  try { mediaRecorder = new MediaRecorder(stream, options); }
+  catch(e) { mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' }); }
+  mediaRecorder.ondataavailable = function(e) { if(e.data.size>0) recordedChunks.push(e.data); };
+  mediaRecorder.onstop = function() {
+    var blob = new Blob(recordedChunks, {type:'video/webm'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'broll-progress-bar-free.webm';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    document.getElementById('progWrap').style.display = 'none';
+    document.getElementById('btnExport').disabled = false;
+  };
+  mediaRecorder.start();
+  document.getElementById('progWrap').style.display = 'block';
+  document.getElementById('btnExport').disabled = true;
+  var startT = performance.now();
+  function exportTick() {
+    var el = performance.now() - startT;
+    var prog = el < durMs ? el/durMs : 1;
+    var pct = Math.min(100, Math.round((el/totalMs)*100));
+    document.getElementById('progFill').style.width = pct+'%';
+    document.getElementById('progLabel').textContent = 'Exporting… '+pct+'%';
+    drawFrame(prog, s);
+    if (el < totalMs) requestAnimationFrame(exportTick);
+    else { drawFrame(1,s); setTimeout(function(){ mediaRecorder.stop(); }, 950); }
+  }
+  exportTick();
+}
+
+// Init
+(function(){
+  var s = getSettings();
+  drawFrame(0, s);
+  var bh = document.getElementById('barHeight');
+  var bl = document.getElementById('barHeightLabel');
+  bh.addEventListener('input', function(){ bl.textContent = bh.value+'%'; });
+})();
+</script>
+</body>
+</html>
